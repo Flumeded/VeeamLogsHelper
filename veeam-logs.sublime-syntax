@@ -1,0 +1,92 @@
+%YAML 1.2
+---
+# See https://www.sublimetext.com/docs/syntax.html
+name: Veeam B&R Logs
+file_extensions:
+  - log
+scope: source.log
+
+contexts:
+  main:
+    # Error/warning on a log line: > [XXXX] Warning / Error / 'Failed' / Error: / Stack:
+    - match: '> (\[\w{4}\])? {0,5}(Warning|Error)|(''Failed'')|(Error:) |(Stack:)'
+      captures:
+        1: string.unquoted
+        2: invalid.illegal
+        3: invalid.illegal
+        4: invalid.illegal
+        5: invalid.illegal
+
+    # Known error keywords
+    - match: 'WARN\||ERR \||>>  \||Cannot create folder|GuestLogin|Failed to enumerate changed areas of the disk using CTK|Cannot use mode hotadd|Cannot mount using this method|Unable to access file|Request timed out|VIX Error|Failed to connect to guest agent|Cannot connect to the host''s administrative share'
+      scope: invalid.illegal
+
+    # Old unsupported VBR versions [5.x / 6.x / 7.x]
+    - match: '\[(5|6|7)\.(0|1|5)\.0\.\d{3}\]'
+      scope: invalid.illegal
+
+    # Timestamp [DD.MM.YYYY HH:MM:SS] or [DD.MM.YYYY HH.MM.SS.mmm]
+    - match: '\[\d{2}\.\d{2}\.\d{4} \d{2}[:.]\d{2}[:.]\d{2}(\.\d{3})?\]'
+      scope: constant.character
+
+    # IP address
+    - match: '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+      scope: string.unquoted
+
+    # Agent session id — first 4 chars of UUID highlighted for correlation with (abcd) notation
+    - match: '(Starting client agent session), id ('')(....)(....-....)(-....-............)('')'
+      captures:
+        1: keyword
+        2: string.quoted.single
+        3: entity.other.attribute-name
+        4: string.quoted.single
+        5: string.quoted.single
+        6: string.quoted.single
+
+    # Double-quoted strings
+    - match: '"'
+      push: double_quoted_string
+
+    # Single-quoted strings (may contain agent commands and other patterns)
+    - match: " '"
+      push: single_quoted_string
+
+    # Escaped newline literal \n
+    - match: '\\n'
+      scope: comment.line
+
+    # Square bracket labels [Label/Path/etc]
+    - match: '\[[%\.\/\$:_ A-Za-z0-9\(\)\-\\'']+\]'
+      scope: string.unquoted
+
+    # Important events
+    - match: 'Processing object|Task session|Job session|File version|Starting job mode|Host content info|VM information|Using source proxy|Using target proxy|Starting agent|Primary bottleneck|Task capacity|Task totalSize|Detected mode|Starting transformation|Disk:|Removing VM snapshot|Saving summary to backup file|Freezing guest operating system|Creating VM snapshot|by user|Creating storage|Renaming remote|Executing|VSS proxy is needed: VSS is enabled|Testing vss proxy ip|source proxy modes|target proxy modes'
+      scope: keyword
+
+    # Bottleneck stats: ;src;network;target;...
+    - match: ';(\d{1,3});(\d{1,3});(\d{1,3});\d{1,3};\d{1,3};(\d{1,3})(;\d{18}|)(\\n|)'
+      captures:
+        1: storage.type
+        2: storage.type
+        3: storage.type
+        4: storage.type
+        6: comment.line
+
+    # Line comments — used by syntax tests; not present in real Veeam logs
+    - match: '#.*'
+      scope: comment.line
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double
+    - match: '"|$'
+      pop: true
+
+  single_quoted_string:
+    - meta_scope: string.quoted.single
+    - match: "'|$"
+      pop: true
+    # Agent commands inside single-quoted strings
+    - match: '(undirEx|undir|viSoapCreds|startServer|openAdditionalDownloadConnections|file2text|text2file|put|prepStorageForWriteEx|sendSignature|delSignature|closeStg|setTrafficCompressionLevel|srcSaveSignature|waitAllDisksClosed|attachVM|detachVM|vddkPrepareForAccess|openDownloadConnections|srcBackupFile|srcAttachVmEx|srcBackupTextSyntFullCopy|srcBackupText|srcBackupDisk|srcText2Tar|shareCreds|setStaRepositoryApartment|version|checkStg|Invoke|isRepositoryServerBusy|vddkEndAccess|stat|srcDetachVm|tar2text|srcReplicateVddkDiskContentIncremental|srcReplicateVddkDiskContent|recvSignature|srcLoadSignature|blocksize|isFileExists|continueBackupSrvFileToTape|continueSessionTapeOnNewMedia|backupSrvFileToTape|getTapeAlerts|checkTapeMedia|startSessionTape|setLogFlushing|backupLocalFileToTape|endSessionTape|breakJobWithReason|breakJob|importVhdDisk|text2tar|patch|backupCfgFileFromBackupFull|backupDiskFromBackupTrad|setTapeMediaBlockSizeToDrive|updateNetworkThrottling|renameFileWithRollback|overbuildIncrement|getTapeMediaId|getTapeHeader|backupSrvSynthesizedStgToTape|compileFIB|executeTapeScript|srcRestore|inventoryTape|dir|backupSrvDirToTape|loadSignature|saveSignature|calcSignature|closeAllStorages|updateRepositoryThrottling|srcBackupDbTransactionLog|replicateVddkDiskDeltaIncremental|restoreDiskCache)'
+      scope: storage.type
+    # Apply remaining main patterns inside single-quoted strings too
+    - include: main
