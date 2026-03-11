@@ -101,7 +101,7 @@ contexts:
       scope: constant.other.uuid.veeamlog
 
     # Veeam backup filenames — before number patterns so digits inside names are not re-matched
-    - match: '[\w\-\.]+\.(vbk|vib|vrb|vbm)'
+    - match: '(?i:[\w\-\.]+\.(?:vab|vbm|vbk|vib|vrb|vsb|vlb|vsm|vlm|vom|vacm|vasm|vsource|vsourcetemp|vstore|vstoretemp|vslice|vbasket|vlist|vcache|vblob|bco|adb|lde|ldf|mdf|lock|vindex))\b'
       scope: entity.name.filename.veeamlog
 
     # IP address — before number patterns to avoid partial matching
