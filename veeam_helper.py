@@ -199,7 +199,9 @@ class VeeamEventListener(sublime_plugin.EventListener):
         if hover_zone != sublime.HOVER_TEXT:
             return
         filename = view.file_name()
-        if not filename or not filename.lower().endswith('.log'):
+        is_log   = filename and filename.lower().endswith('.log')
+        is_xml_view = view.name() == 'Job Options XML'
+        if not is_log and not is_xml_view:
             return
 
         # 1. Option name lookup (works in both XML and bracket-format lines)
