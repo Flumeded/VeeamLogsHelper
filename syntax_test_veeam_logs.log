@@ -87,6 +87,52 @@ ERR | Something
 [23.02.2026 15:13:57.090] <01> Info         Reverse inc file Job.vrb processed
 #                                                                  ^^^^ entity.name.filename.veeamlog
 
+# Original Veeam backup files
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vab
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vsb
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vlb
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vlm
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vom
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vacm
+#                                                        ^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vasm
+#                                                        ^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vsource
+#                                                        ^^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vsourcetemp
+#                                                        ^^^^^^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vstore
+#                                                        ^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vstoretemp
+#                                                        ^^^^^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vbasket
+#                                                        ^^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vlist
+#                                                        ^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vcache
+#                                                        ^^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.vblob
+#                                                        ^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.bco
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.adb
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+# Third-party files referenced in Veeam logs
+[23.02.2026 15:13:57.090] <01> Info         SQL log data.ldf
+#                                                       ^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         SQL master master.mdf
+#                                                           ^^^^^^^^ entity.name.filename.veeamlog
+[23.02.2026 15:13:57.090] <01> Info         Lock file Job.lock acquired
+#                                                        ^^^^^^^^ entity.name.filename.veeamlog
+# Case-insensitive matching
+[23.02.2026 15:13:57.090] <01> Info         Processing Job.VBK
+#                                                        ^^^^^^^ entity.name.filename.veeamlog
+
 # --- Numbers ---
 [31.08.2016 01:43:18] <44> Info     processed 1,024,000 bytes
 #                                             ^^^^^^^^^ constant.numeric.general.veeamlog
