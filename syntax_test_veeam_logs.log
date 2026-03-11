@@ -1,0 +1,110 @@
+# SYNTAX TEST "Packages/VeeamLogsHelper/veeam-logs.sublime-syntax"
+
+# --- Timestamps ---
+[31.08.2016 01:43:18] <44> Info     [AgentMngr] Starting agent
+# ^^^^^^^^^^^^^^^^^^^^ constant.character
+
+[31.08.2016 01:43:18.123] <44> Info     [AgentMngr] Starting agent
+# ^^^^^^^^^^^^^^^^^^^^^^^^ constant.character
+
+[31.08.2016 01.43.18] <44> Info     [AgentMngr] Starting agent
+# ^^^^^^^^^^^^^^^^^^^^ constant.character
+
+# --- IP addresses ---
+[31.08.2016 01:43:18] <44> Info     IPs: '10.40.106.110', agent
+#                                         ^^^^^^^^^^^^^^ string.unquoted
+
+# --- Square bracket labels ---
+[31.08.2016 01:43:18] <44> Info     [AgentMngr] Starting agent
+#                                    ^^^^^^^^^^^ string.unquoted
+
+# --- Errors and warnings ---
+[31.08.2016 01:43:18] <44> Warning  [AgentMngr] Something happened
+#                          ^^^^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Error    [AgentMngr] Something failed
+#                          ^^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Info     [AgentMngr] 'Failed' to connect
+#                                                ^^^^^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Info     Error: cannot open file
+#                                   ^^^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Info     Stack: at line 42
+#                                   ^^^^^^ invalid.illegal
+
+# --- Known error keywords ---
+WARN| Something
+# ^^^^^ invalid.illegal
+
+ERR | Something
+# ^^^^ invalid.illegal
+
+>>  | Something
+# ^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Info     Request timed out connecting to host
+#                                   ^^^^^^^^^^^^^^^^^^^ invalid.illegal
+
+[31.08.2016 01:43:18] <44> Info     VIX Error code 1
+#                                   ^^^^^^^^^ invalid.illegal
+
+# --- Old unsupported versions ---
+[5.0.0.123] VBR old version
+# ^^^^^^^^^^^ invalid.illegal
+
+[6.1.0.456] VBR old version
+# ^^^^^^^^^^^ invalid.illegal
+
+[7.5.0.789] VBR old version
+# ^^^^^^^^^^^ invalid.illegal
+
+# --- Double-quoted strings ---
+[31.08.2016 01:43:18] <44> Info     Job name "My Backup Job"
+#                                             ^^^^^^^^^^^^^^^ string.quoted.double
+
+# --- Single-quoted strings ---
+[31.08.2016 01:43:18] <44> Info     Host 'server.domain.local'
+#                                        ^^^^^^^^^^^^^^^^^^^^ string.quoted.single
+
+# --- Agent commands inside single-quoted strings ---
+[31.08.2016 01:43:18] <44> Info     Command 'srcBackupDisk arg1 arg2'
+#                                             ^^^^^^^^^^^^ storage.type
+
+[31.08.2016 01:43:18] <44> Info     Command 'put file.dat'
+#                                             ^^^ storage.type
+
+[31.08.2016 01:43:18] <44> Info     Command 'openDownloadConnections 4'
+#                                             ^^^^^^^^^^^^^^^^^^^^^^^ storage.type
+
+# --- Important events ---
+[31.08.2016 01:43:18] <44> Info     Processing object 'vm-001'
+#                                   ^^^^^^^^^^^^^^^^^ keyword
+
+[31.08.2016 01:43:18] <44> Info     Using source proxy server
+#                                   ^^^^^^^^^^^^^^^^^ keyword
+
+[31.08.2016 01:43:18] <44> Info     Creating VM snapshot
+#                                   ^^^^^^^^^^^^^^^^^^^ keyword
+
+[31.08.2016 01:43:18] <44> Info     Primary bottleneck: Source
+#                                   ^^^^^^^^^^^^^^^^^^^ keyword
+
+# --- Agent session id ---
+[31.08.2016 01:43:18] <44> Info     [ProxyAgent] Starting client agent session, id '72f94b78-1b0a-4e24-a42c-298f838ae9d9', host 'srv'
+#                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ keyword
+#                                                                               ^^ string.quoted.single
+#                                                                                 ^^^^ entity.other.attribute-name
+#                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ string.quoted.single
+
+# --- Bottleneck stats ---
+[31.08.2016 01:43:18] <44> Info     Bottleneck: ;10;20;30;0;0;40
+#                                               ^^^ storage.type
+#                                                  ^^^ storage.type
+#                                                     ^^^ storage.type
+#                                                           ^^^ storage.type
+
+# --- Escaped newline literal ---
+[31.08.2016 01:43:18] <44> Info     value\n
+#                                         ^^ comment.line
