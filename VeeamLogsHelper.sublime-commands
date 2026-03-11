@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "Veeam: Format Job Options XML",
+        "command": "veeam_format_xml"
+    }
+]
