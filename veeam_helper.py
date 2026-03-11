@@ -215,9 +215,9 @@ class VeeamEventListener(sublime_plugin.EventListener):
         body = (
             '<body id="veeam-option-doc">'
             '<style>'
-            '  body { font-family: sans-serif; font-size: 0.9em; margin: 6px; }'
-            '  .name { font-weight: bold; color: var(--yellowish); }'
-            '  .doc  { margin-top: 4px; }'
+            '  body {{ font-family: sans-serif; font-size: 0.9em; margin: 6px; }}'
+            '  .name {{ font-weight: bold; color: var(--yellowish); }}'
+            '  .doc  {{ margin-top: 4px; }}'
             '</style>'
             '<div class="name">{0}</div>'
             '<div class="doc">{1}</div>'
