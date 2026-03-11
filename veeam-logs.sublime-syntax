@@ -4,89 +4,131 @@
 name: Veeam B&R Logs
 file_extensions:
   - log
-scope: source.log
+scope: source.veeamlog
 
 contexts:
   main:
-    # Error/warning on a log line: > [XXXX] Warning / Error / 'Failed' / Error: / Stack:
+    # --- Errors (highest priority) ---
+
+    # Error keyword: highlight it, then apply meta_scope to rest of line
+    - match: '\b(?:Error|ERROR)\b'
+      scope: keyword.logtag.error.veeamlog
+      push: error_line_tail
+
+    # Known error prefixes and messages
+    - match: 'WARN\||ERR \||>>  \||Cannot create folder|GuestLogin|Failed to enumerate changed areas of the disk using CTK|Cannot use mode hotadd|Cannot mount using this method|Unable to access file|Request timed out|VIX Error|Failed to connect to guest agent|Cannot connect to the host''s administrative share'
+      scope: invalid.illegal.veeamlog
+
+    # Error/warning in log level position: > [XXXX] Warning / 'Failed' / Error: / Stack:
     - match: '> (\[\w{4}\])? {0,5}(Warning|Error)|(''Failed'')|(Error:) |(Stack:)'
       captures:
-        1: string.unquoted
-        2: invalid.illegal
-        3: invalid.illegal
-        4: invalid.illegal
-        5: invalid.illegal
-
-    # Known error keywords
-    - match: 'WARN\||ERR \||>>  \||Cannot create folder|GuestLogin|Failed to enumerate changed areas of the disk using CTK|Cannot use mode hotadd|Cannot mount using this method|Unable to access file|Request timed out|VIX Error|Failed to connect to guest agent|Cannot connect to the host''s administrative share'
-      scope: invalid.illegal
+        1: string.unquoted.veeamlog
+        2: invalid.illegal.veeamlog
+        3: invalid.illegal.veeamlog
+        4: invalid.illegal.veeamlog
+        5: invalid.illegal.veeamlog
 
     # Old unsupported VBR versions [5.x / 6.x / 7.x]
     - match: '\[(5|6|7)\.(0|1|5)\.0\.\d{3}\]'
-      scope: invalid.illegal
+      scope: invalid.illegal.veeamlog
 
-    # Timestamp [DD.MM.YYYY HH:MM:SS] or [DD.MM.YYYY HH.MM.SS.mmm]
-    - match: '\[\d{2}\.\d{2}\.\d{4} \d{2}[:.]\d{2}[:.]\d{2}(\.\d{3})?\]'
-      scope: constant.character
+    # --- Log tags ---
+    - match: '\b(?:Warning|Debug|Critical)\b'
+      scope: keyword.logtag.warning.veeamlog
+    - match: '\bInfo\b'
+      scope: keyword.logtag.info.veeamlog
 
-    # IP address
-    - match: '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
-      scope: string.unquoted
+    # --- Common line patterns (timestamp, thread, labels, UUIDs, IPs, numbers) ---
+    - include: common_line
 
-    # Agent session id — first 4 chars of UUID highlighted for correlation with (abcd) notation
+    # --- Agent session id — first 4 chars of UUID highlighted for (abcd) correlation ---
+    # Must come before general UUID matching in common_line
     - match: '(Starting client agent session), id ('')(....)(....-....)(-....-............)('')'
       captures:
-        1: keyword
-        2: string.quoted.single
-        3: entity.other.attribute-name
-        4: string.quoted.single
-        5: string.quoted.single
-        6: string.quoted.single
+        1: keyword.control.veeamlog
+        2: string.quoted.single.veeamlog
+        3: entity.other.attribute-name.veeamlog
+        4: string.quoted.single.veeamlog
+        5: string.quoted.single.veeamlog
+        6: string.quoted.single.veeamlog
 
-    # Double-quoted strings
+    # --- Important events ---
+    - match: 'Processing object|Task session|Job session|File version|Starting job mode|Host content info|VM information|Using source proxy|Using target proxy|Starting agent|Primary bottleneck|Task capacity|Task totalSize|Detected mode|Starting transformation|Disk:|Removing VM snapshot|Saving summary to backup file|Freezing guest operating system|Creating VM snapshot|by user|Creating storage|Renaming remote|Executing|VSS proxy is needed: VSS is enabled|Testing vss proxy ip|source proxy modes|target proxy modes'
+      scope: keyword.control.veeamlog
+
+    # --- Bottleneck stats: ;src;network;target;... ---
+    - match: ';(\d{1,3});(\d{1,3});(\d{1,3});\d{1,3};\d{1,3};(\d{1,3})(;\d{18}|)(\\n|)'
+      captures:
+        1: storage.type.veeamlog
+        2: storage.type.veeamlog
+        3: storage.type.veeamlog
+        4: storage.type.veeamlog
+        6: comment.line.veeamlog
+
+    # --- Strings ---
     - match: '"'
       push: double_quoted_string
-
-    # Single-quoted strings (may contain agent commands and other patterns)
     - match: " '"
       push: single_quoted_string
 
     # Escaped newline literal \n
     - match: '\\n'
-      scope: comment.line
-
-    # Square bracket labels [Label/Path/etc]
-    - match: '\[[%\.\/\$:_ A-Za-z0-9\(\)\-\\'']+\]'
-      scope: string.unquoted
-
-    # Important events
-    - match: 'Processing object|Task session|Job session|File version|Starting job mode|Host content info|VM information|Using source proxy|Using target proxy|Starting agent|Primary bottleneck|Task capacity|Task totalSize|Detected mode|Starting transformation|Disk:|Removing VM snapshot|Saving summary to backup file|Freezing guest operating system|Creating VM snapshot|by user|Creating storage|Renaming remote|Executing|VSS proxy is needed: VSS is enabled|Testing vss proxy ip|source proxy modes|target proxy modes'
-      scope: keyword
-
-    # Bottleneck stats: ;src;network;target;...
-    - match: ';(\d{1,3});(\d{1,3});(\d{1,3});\d{1,3};\d{1,3};(\d{1,3})(;\d{18}|)(\\n|)'
-      captures:
-        1: storage.type
-        2: storage.type
-        3: storage.type
-        4: storage.type
-        6: comment.line
+      scope: comment.line.veeamlog
 
     # Line comments — used by syntax tests; not present in real Veeam logs
     - match: '#.*'
-      scope: comment.line
+      scope: comment.line.veeamlog
+
+  common_line:
+    # Timestamp [DD.MM.YYYY HH:MM:SS] — handles : and . separators, optional milliseconds
+    - match: '\[\d{2}\.\d{2}\.\d{4} \d{2}[:.]\d{2}[:.]\d{2}(\.\d{3})?\]'
+      scope: constant.numeric.timestamp.veeamlog
+
+    # Thread ID <44>
+    - match: '<\d+>'
+      scope: entity.name.thread.veeamlog
+
+    # Log level number (3)
+    - match: '\(\d+\)'
+      scope: constant.numeric.loglevel.veeamlog
+
+    # Square bracket labels [AgentMngr] — timestamp must come first to avoid conflict
+    - match: '\[[%\.\/\$:_ A-Za-z0-9\(\)\-\\'']+\]'
+      scope: entity.name.task.veeamlog
+
+    # UUID (full — general case; agent session short ID is handled in main)
+    - match: '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b'
+      scope: constant.other.uuid.veeamlog
+
+    # IP address — before number patterns to avoid partial matching
+    - match: '\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'
+      scope: constant.numeric.ip.veeamlog
+
+    # Numbers with thousands separators (e.g. 1,024,000 or 3.14)
+    - match: '\b\d{1,3}(,\d{3})+(\.\d+)?\b'
+      scope: constant.numeric.general.veeamlog
+    # Plain integers and decimals
+    - match: '\b\d+(\.\d+)?\b'
+      scope: constant.numeric.general.veeamlog
+
+  error_line_tail:
+    # meta_scope covers everything from after the Error keyword to end of line,
+    # allowing themes to background-highlight the error line tail
+    - meta_scope: meta.line.error.veeamlog
+    - include: common_line
+    - match: '$'
+      pop: true
 
   double_quoted_string:
-    - meta_scope: string.quoted.double
+    - meta_scope: string.quoted.double.veeamlog
     - match: '"|$'
       pop: true
 
   single_quoted_string:
-    - meta_scope: string.quoted.single
+    - meta_scope: string.quoted.single.veeamlog
     - match: "'|$"
       pop: true
-    # Agent commands inside single-quoted strings
+    # Agent commands
     - match: '(undirEx|undir|viSoapCreds|startServer|openAdditionalDownloadConnections|file2text|text2file|put|prepStorageForWriteEx|sendSignature|delSignature|closeStg|setTrafficCompressionLevel|srcSaveSignature|waitAllDisksClosed|attachVM|detachVM|vddkPrepareForAccess|openDownloadConnections|srcBackupFile|srcAttachVmEx|srcBackupTextSyntFullCopy|srcBackupText|srcBackupDisk|srcText2Tar|shareCreds|setStaRepositoryApartment|version|checkStg|Invoke|isRepositoryServerBusy|vddkEndAccess|stat|srcDetachVm|tar2text|srcReplicateVddkDiskContentIncremental|srcReplicateVddkDiskContent|recvSignature|srcLoadSignature|blocksize|isFileExists|continueBackupSrvFileToTape|continueSessionTapeOnNewMedia|backupSrvFileToTape|getTapeAlerts|checkTapeMedia|startSessionTape|setLogFlushing|backupLocalFileToTape|endSessionTape|breakJobWithReason|breakJob|importVhdDisk|text2tar|patch|backupCfgFileFromBackupFull|backupDiskFromBackupTrad|setTapeMediaBlockSizeToDrive|updateNetworkThrottling|renameFileWithRollback|overbuildIncrement|getTapeMediaId|getTapeHeader|backupSrvSynthesizedStgToTape|compileFIB|executeTapeScript|srcRestore|inventoryTape|dir|backupSrvDirToTape|loadSignature|saveSignature|calcSignature|closeAllStorages|updateRepositoryThrottling|srcBackupDbTransactionLog|replicateVddkDiskDeltaIncremental|restoreDiskCache)'
-      scope: storage.type
-    # Apply remaining main patterns inside single-quoted strings too
+      scope: storage.type.veeamlog
     - include: main
