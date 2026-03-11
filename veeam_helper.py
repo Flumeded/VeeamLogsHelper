@@ -219,10 +219,10 @@ class VeeamEventListener(sublime_plugin.EventListener):
             '  .name { font-weight: bold; color: var(--yellowish); }'
             '  .doc  { margin-top: 4px; }'
             '</style>'
-            f'<div class="name">{option_name}</div>'
-            f'<div class="doc">{doc}</div>'
+            '<div class="name">{0}</div>'
+            '<div class="doc">{1}</div>'
             '</body>'
-        )
+        ).format(option_name, doc)
         view.show_popup(
             body,
             location=point,
@@ -257,7 +257,7 @@ class VeeamFormatXmlCommand(sublime_plugin.TextCommand):
             # Drop the <?xml ...?> declaration line.
             pretty = '\n'.join(pretty.splitlines()[1:])
         except Exception as e:
-            sublime.status_message(f'Veeam: XML parse error — {e}')
+            sublime.status_message('Veeam: XML parse error — {0}'.format(e))
             return
 
         new_view = view.window().new_file()
